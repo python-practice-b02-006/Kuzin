@@ -172,15 +172,15 @@ while not finished:
     screen.blit(text1, (10, 10))
     
     f1 = pygame.font.Font(None, 36)  
-    text1 = f1.render(Records[0], 1, (180, 0, 0))       
+    text1 = f1.render(Records[0][:-1], 1, (180, 0, 0))       
     screen.blit(text1, (10, 40))
     
     f1 = pygame.font.Font(None, 36)  
-    text1 = f1.render(Records[1], 1, (180, 0, 0))       
+    text1 = f1.render(Records[1][:-1], 1, (180, 0, 0))       
     screen.blit(text1, (10, 70))
     
     f1 = pygame.font.Font(None, 36)  
-    text1 = f1.render(Records[2], 1, (180, 0, 0))       
+    text1 = f1.render(Records[2][:-1], 1, (180, 0, 0))       
     screen.blit(text1, (10, 100))
     
     while j < number_of_balls:
@@ -196,7 +196,8 @@ while not finished:
 
     pygame.display.update()
     screen.fill(BLACK)
-  
+
+#Show best scores  
 Records.append(Score)
 
 for i in range(len(Records)):
@@ -205,7 +206,8 @@ Records.sort(reverse = True)
 
 for i in range(len(Records)):
     Records[i] = str(Records[i])
-    
+
+#Rewriting records to file    
 f.seek(0)
 
 for  el in Records:
