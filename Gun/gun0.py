@@ -13,14 +13,28 @@ SCREEN_SIZE = (800, 600)
 
 
 class Gun():
-    def __init__(self, coord=[30, SCREEN_SIZE[1]//2]):
+    def __init__(self, coord=[30, SCREEN_SIZE[1]//2], min_pow=10, max_pow=30):
         self.coord = coord
         self.angle = 0
+        self.min_pow = min_pow
+        self.max_pow = max_pow
+        self.power = min_pow
+        self.active = False
+
+    def strike(self):
+        vel = [int(self.power * np.cos(self.angle)), int(self.power * np.sin(self.angle))]
+        self.active = False
+        self.power = self.min_pow
+        return Ball(list(self.coord), vel)
+        
+    def move(self):
+        if self.active and self.power < self.max_pow:
+            self.power += 1
 
     def draw(self, screen):
         gun_shape = []
         v1 = np.array([int(5*np.cos(self.angle - np.pi/2)), int(5*np.sin(self.angle - np.pi/2))])
-        v2 = np.array([int(20*np.cos(self.angle)), int(20*np.sin(self.angle))])
+        v2 = np.array([int(self.power*2*np.cos(self.angle)), int(self.power*2*np.sin(self.angle))])
         gun_pos = np.array(self.coord)
         gun_shape.append((gun_pos + v1).tolist())
         gun_shape.append((gun_pos + v1 + v2).tolist())
@@ -77,7 +91,6 @@ class Manager():
         self.gun = Gun()
         self.table = Table()
         self.balls = []
-        self.balls.append(Ball([100, 100], [10, 20]))
         
     def process(self, events, screen):
         done = self.handle_events(events)
@@ -94,18 +107,27 @@ class Manager():
     def move(self):
         for ball in self.balls:
             ball.move()
-
+        self.gun.move()
         
     def handle_events(self, events):
         done = False
         for event in events:
             if event.type == pg.QUIT:
                 done = True
-            elif event.type == pg.KEYDOWN:    
+                
+            elif event.type == pg.KEYDOWN:
+                
                 if event.key == pg.K_UP:
                     self.gun.coord[1] -= 5
                 elif event.key == pg.K_DOWN:
                     self.gun.coord[1] += 5
+                    
+            elif event.type == pg.MOUSEBUTTONDOWN:
+                if event.button == 1:
+                    self.gun.active = True
+            elif event.type == pg.MOUSEBUTTONUP:
+                if event.button == 1:
+                    self.balls.append(self.gun.strike())
         
         if pg.mouse.get_focused():
             mouse_pos = pg.mouse.get_pos()
