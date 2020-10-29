@@ -21,7 +21,10 @@ class THREEDV():
         
     def __mul__(self, number):
         return THREEDV(self.x*number, self.y*number, self.z*number)
-    
+        
+    def __rmul__(self, number):
+        return THREEDV(self.x*number, self.y*number, self.z*number)
+        
     def __matmul__(self, inst):
         return THREEDV(self.y*inst.z - self.z*inst.y, self.z*inst.x - self.x*inst.z, self.x*inst.y - self.y*inst.x)
     
@@ -37,8 +40,8 @@ class THREEDV():
 V3D1 = THREEDV(1, 4, 2)
 V3D2 = THREEDV(7, 1, 3)
 
-A = V3D1 + V3D2
+A = 2 * V3D2 
 
-print(A.normal)
+print(A)
     
     
