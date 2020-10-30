@@ -58,7 +58,8 @@ class Ball():
     def draw(self, screen):
         pg.draw.circle(screen, self.color, self.coord, self.rad)
     
-    def move(self, t_step=1.):
+    def move(self, t_step=1., a=1):
+        self.vel[1] += a
         for i in range(2):
             self.coord[i] += int(self.vel[i] * t_step)
         self.check_walls()
@@ -73,7 +74,7 @@ class Ball():
                 self.coord[i] = SCREEN_SIZE[i] - self.rad
                 self.flip_vel(n[i])
                 
-    def flip_vel(self, axis, coef_perp = 1., coef_par = 1.):
+    def flip_vel(self, axis, coef_perp = 0.9, coef_par = .9):
         vel = np.array(self.vel)
         n = np.array(axis)
         n = n / np.linalg.norm(n)
@@ -119,6 +120,9 @@ class Manager():
         self.balls = []
         self.targets = []
         
+    def new_targets(self):
+        self.targets.append(Target())
+        
         
     def process(self, events, screen):
         done = self.handle_events(events)
@@ -126,8 +130,8 @@ class Manager():
         self.draw(screen)
         return done
         
-        if len(self.targets) == 0 and len(self.balls) == 0:
-            self.redraw()
+        #if len(self.targets) == 0 and len(self.balls) == 0:
+        #self.new_targets()
 
              
     def draw(self, screen):
