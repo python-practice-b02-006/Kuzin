@@ -114,7 +114,7 @@ class Table():
     
     def draw(self,screen):
         surf = []
-        surf.append(self.font.render('Score:'.format(self.score()),True, BLUE))
+        surf.append(self.font.render("Score: {}".format(self.score()), True, BLUE))
         screen.blit(surf[0], [10, 10])
 
 class Manager():
@@ -125,7 +125,8 @@ class Manager():
         self.balls = []
         self.targets = []
         self.new_targets()
-        
+
+         
     def new_targets(self):
         self.targets.append(Target())
         
@@ -135,10 +136,9 @@ class Manager():
         self.move()
         self.draw(screen)
         self.collide()  
+        if len(self.targets) == 0 and len(self.balls) == 0:
+            self.new_targets()
         return done
-        
-        #if len(self.targets) == 0 and len(self.balls) == 0:
-        #self.new_targets()
 
              
     def draw(self, screen):
@@ -174,7 +174,7 @@ class Manager():
         targets_c.sort()
         for j in reversed(targets_c):
             self.table.t_destr += 1
-            self.targets.pop(j)    
+            self.targets.pop(j)   
     
     
     def handle_events(self, events):
