@@ -90,13 +90,13 @@ class Target():
         self.rad = rad
         self.color = color
         
-        def check_ball(self,ball):
-            dist = sum([(self.coord[i] - ball.coord[i])**2 for i in range(2)])**0.5
-            min_dist = self.rad + ball.rad
-            return dist <= min_dist    
+    def check_ball(self,ball):
+        dist = sum([(self.coord[i] - ball.coord[i])**2 for i in range(2)])**0.5
+        min_dist = self.rad + ball.rad
+        return dist <= min_dist    
             
-        def draw(self, screen):
-            pg.draw.circle(screen, self.color, self.coord, self.rad)
+    def draw(self, screen):
+        pg.draw.circle(screen, self.color, self.coord, self.rad)
     
 class Table():
     def __init__(self, t_destr=0, b_used=0):
@@ -119,6 +119,7 @@ class Manager():
         self.table = Table()
         self.balls = []
         self.targets = []
+        self.new_targets()
         
     def new_targets(self):
         self.targets.append(Target())
