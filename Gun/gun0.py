@@ -54,6 +54,8 @@ class Ball():
         self.coord = coord
         self.vel = vel
         self.rad = rad
+        self.delete = False
+        
         
     def draw(self, screen):
         pg.draw.circle(screen, self.color, self.coord, self.rad)
@@ -63,6 +65,9 @@ class Ball():
         for i in range(2):
             self.coord[i] += int(self.vel[i] * t_step)
         self.check_walls()
+        
+        if self.vel[0]**2 + self.vel[1]**2 < 2**2 and self.coord[1] > SCREEN_SIZE[1] - 2*self.rad:
+            self.delete = True
         
     def check_walls(self):
         n = [[1, 0], [0, 1]]
@@ -149,9 +154,14 @@ class Manager():
             target.draw(screen)
         
     def move(self):
-        for ball in self.balls:
+        dead_balls = []
+        for i, ball in enumerate(self.balls):
             ball.move()
-        self.gun.move() 
+            if ball.delete:
+                dead_balls.append(i)
+        for i in reversed(dead_balls):
+            self.balls.pop(i)
+        self.gun.move()
         
     def handle_events(self, events):
         done = False
