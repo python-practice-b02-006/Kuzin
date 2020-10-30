@@ -79,7 +79,7 @@ class Ball():
                 self.coord[i] = SCREEN_SIZE[i] - self.rad
                 self.flip_vel(n[i])
                 
-    def flip_vel(self, axis, coef_perp = 0.9, coef_par = .9):
+    def flip_vel(self, axis, coef_perp = 0.8, coef_par = .9):
         vel = np.array(self.vel)
         n = np.array(axis)
         n = n / np.linalg.norm(n)
@@ -134,6 +134,7 @@ class Manager():
         done = self.handle_events(events)
         self.move()
         self.draw(screen)
+        self.collide()  
         return done
         
         #if len(self.targets) == 0 and len(self.balls) == 0:
@@ -163,6 +164,19 @@ class Manager():
             self.balls.pop(i)
         self.gun.move()
         
+    def collide(self):
+        collisions = []
+        targets_c = []
+        for i, ball in enumerate(self.balls):
+            for j, target in enumerate(self.targets):
+                if target.check_ball(ball):
+                    targets_c.append(j)
+        targets_c.sort()
+        for j in reversed(targets_c):
+            self.table.t_destr += 1
+            self.targets.pop(j)    
+    
+    
     def handle_events(self, events):
         done = False
         for event in events:
