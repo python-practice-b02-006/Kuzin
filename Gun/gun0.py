@@ -81,33 +81,72 @@ class Ball():
         vel_par = vel - vel_perp
         ans = -vel_perp * coef_perp + vel_par * coef_par
         self.vel = ans.astype(np.int).tolist()
+        
+class Target():
+    def __init__(self, coord=None, color=RED, rad=30):
+        coord = [randint(rad, SCREEN_SIZE[0] - rad), randint(rad, SCREEN_SIZE[1] - rad)]
+        self.coord = coord
+        self.rad = rad
+        self.color = color
+        
+        def check_ball(self,ball):
+            dist = sum([(self.coord[i] - ball.coord[i])**2 for i in range(2)])**0.5
+            min_dist = self.rad + ball.rad
+            return dist <= min_dist    
+            
+        def draw(self, screen):
+            pg.draw.circle(screen, self.color, self.coord, self.rad)
     
 class Table():
-    pass
+    def __init__(self, t_destr=0, b_used=0):
+        self.t_destr = t_destr
+        self.b_used = b_used
+        self.font = pg.font.SysFont("Ariel", 50)
+
+    def score(self):
+        return self.t_destr - self.b_used
     
+    def draw(self,screen):
+        surf = []
+        surf.append(self.font.render('Score:'.format(self.score()),True, BLUE))
+        screen.blit(surf[0], [10, 10])
+
 class Manager():
 
     def __init__(self):
         self.gun = Gun()
         self.table = Table()
         self.balls = []
+        self.targets = []
+        
         
     def process(self, events, screen):
         done = self.handle_events(events)
         self.move()
         self.draw(screen)
         return done
+        
+        if len(self.targets) == 0 and len(self.balls) == 0:
+            self.redraw()
+
              
     def draw(self, screen):
         screen.fill(BLACK)
+        
         for ball in self.balls:
             ball.draw(screen)
+            
         self.gun.draw(screen)
+        
+        self.table.draw(screen)
+        
+        for target in self.targets:
+            target.draw(screen)
         
     def move(self):
         for ball in self.balls:
             ball.move()
-        self.gun.move()
+        self.gun.move() 
         
     def handle_events(self, events):
         done = False
