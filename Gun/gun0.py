@@ -48,7 +48,7 @@ class Gun():
                                 mouse_pos[0] - self.coord[0])   
     
 class Ball():
-    def __init__(self, coord, vel, rad=15, color=None):
+    def __init__(self, coord, vel=[0,0], rad=15, color=None):
         if color == None:
             color = (randint(0, 255), randint(0, 255), randint(0, 255))
         self.color = color
@@ -61,7 +61,7 @@ class Ball():
     def draw(self, screen):
         pg.draw.circle(screen, self.color, self.coord, self.rad)
     
-    def move(self, t_step=1, a=1):
+    def move(self, t_step=1., a=1):
         self.vel[1] += a*t_step
         for i in range(2):
             self.coord[i] += int(self.vel[i] * t_step)
@@ -144,13 +144,12 @@ class Manager():
         self.balls = []
         self.targets = []
         self.obstacles = []
-        
-        self.targets.append(Target())       
-        self.obstacles.append(Obstacle())
+        self.new_targets()
          
     def new_targets(self):
         self.targets.append(Target())
-        self.obstacles.pop(0)        
+        if len(self.obstacles) > 0: 
+            self.obstacles.pop(0)        
         self.obstacles.append(Obstacle())
         
     def process(self, events, screen):
@@ -181,8 +180,9 @@ class Manager():
         
     def move(self):
         dead_balls = []
-        for i, ball in enumerate(self.balls):
+        for ball in self.balls:
             ball.move()
+        for i, ball in enumerate(self.balls):
             if ball.delete:
                 dead_balls.append(i)
         for i in reversed(dead_balls):
@@ -199,24 +199,14 @@ class Manager():
                     targets_c.append(j)
                     
             for obstacle in self.obstacles:
+            
                 distance = ((obstacle.mid[0] - ball.coord[0])*np.sin(obstacle.angle) - (obstacle.mid[1] - ball.coord[1])*np.cos(obstacle.angle),
                            -(obstacle.mid[1] - ball.coord[1])*np.sin(obstacle.angle) - (obstacle.mid[0] - ball.coord[0])*np.sin(obstacle.angle))
 
                 if  np.abs(distance[0]) < ball.rad and np.abs(distance[1]) < obstacle.rad/2: 
                     self.obstacles.pop(0)
-                    if distance[0] > 0:
-                    
-                        ball.coord[0] = int((obstacle.mid[0] - (ball.rad)*np.sin(obstacle.angle) + distance[1]*np.cos(obstacle.angle)))
-                        ball.coord[1] = int(obstacle.mid[1] + (ball.rad)*np.cos(obstacle.angle) + distance[1]*np.sin(obstacle.angle))
-                       
-                        #ball.flip_vel([np.sin(obstacle.angle), -np.cos(obstacle.angle)])
-                        
-                    if distance[0] < 0:
-                    
-                        ball.coord[0] = int(obstacle.mid[0] + (ball.rad)*np.sin(obstacle.angle) + distance[1]*np.cos(obstacle.angle))
-                        ball.coord[1] = int(obstacle.mid[1] - (ball.rad)*np.cos(obstacle.angle) + distance[1]*np.sin(obstacle.angle))
-                       
-                        #ball.flip_vel([-np.sin(obstacle.angle), np.cos(obstacle.angle)])
+                    ball.vel[1] = 0.5*ball.vel[1]
+                    ball.vel[0] = 0.5*ball.vel[0]
                             
         targets_c.sort()
         for j in reversed(targets_c):                                                                                                     
