@@ -8,6 +8,7 @@ WHITE = (255, 255, 255)
 BLACK = (0, 0, 0)
 RED = (255, 0, 0)
 BLUE = (0, 0, 255)
+GREEN = (0, 255, 0)
 
 SCREEN_SIZE = (800, 600)
 
@@ -89,7 +90,7 @@ class Ball():
         self.vel = ans.astype(np.int).tolist()
         
 class Target():
-    def __init__(self, coord=None, color=RED, rad=30):
+    def __init__(self, coord=None, color=GREEN, rad=30):
         coord = [randint(rad, SCREEN_SIZE[0] - rad), randint(rad, SCREEN_SIZE[1] - rad)]
         self.coord = coord
         self.rad = rad
@@ -102,6 +103,21 @@ class Target():
             
     def draw(self, screen):
         pg.draw.circle(screen, self.color, self.coord, self.rad)
+       
+class Obstacle():
+    def __init__(self, coord=None, color=RED, rad=90):
+        coord = [randint(90, SCREEN_SIZE[0] - 90), randint(90, SCREEN_SIZE[1] - 90)]
+        angle = [randint(0,360)]
+        self.coord = coord
+        self.rad = rad
+        self.color = color
+        self.angle = angle
+        
+        self.coord2 = (self.rad*np.cos(self.angle) + self.coord[0] ,self.rad*np.sin(self.angle) + self.coord[1])
+            
+    def draw(self, screen):
+        pg.draw.line(screen, self.color, self.coord, self.coord2, 1)
+
     
 class Table():
     def __init__(self, t_destr=0, b_used=0):
@@ -116,6 +132,8 @@ class Table():
         surf = []
         surf.append(self.font.render("Score: {}".format(self.score()), True, BLUE))
         screen.blit(surf[0], [10, 10])
+        
+
 
 class Manager():
 
@@ -124,12 +142,13 @@ class Manager():
         self.table = Table()
         self.balls = []
         self.targets = []
+        self.obstacles = []
         self.new_targets()
 
          
     def new_targets(self):
         self.targets.append(Target())
-        
+        self.obstacles.append(Obstacle())
         
     def process(self, events, screen):
         done = self.handle_events(events)
@@ -148,6 +167,9 @@ class Manager():
             ball.draw(screen)
             
         self.gun.draw(screen)
+        
+        for obstacle in self.obstacles:
+            obstacle.draw(screen)
         
         self.table.draw(screen)
         
@@ -214,7 +236,7 @@ clock = pg.time.Clock()
 mgr = Manager()
 
 while not done:
-    clock.tick(15)
+    clock.tick(60)
 
     done = mgr.process(pg.event.get(), screen)
 
