@@ -61,8 +61,8 @@ class Ball():
     def draw(self, screen):
         pg.draw.circle(screen, self.color, self.coord, self.rad)
     
-    def move(self, t_step=1., a=1):
-        self.vel[1] += a
+    def move(self, t_step=1, a=1):
+        self.vel[1] += a*t_step
         for i in range(2):
             self.coord[i] += int(self.vel[i] * t_step)
         self.check_walls()
@@ -112,6 +112,7 @@ class Obstacle():
         self.rad = rad
         self.color = color
         self.angle = angle
+        self.mid = (self.rad*np.cos(self.angle)/2 + self.coord[0] ,self.rad*np.sin(self.angle)/2 + self.coord[1])
         
         self.coord2 = (self.rad*np.cos(self.angle) + self.coord[0] ,self.rad*np.sin(self.angle) + self.coord[1])
             
@@ -143,11 +144,13 @@ class Manager():
         self.balls = []
         self.targets = []
         self.obstacles = []
-        self.new_targets()
-
+        
+        self.targets.append(Target())       
+        self.obstacles.append(Obstacle())
          
     def new_targets(self):
         self.targets.append(Target())
+        self.obstacles.pop(0)        
         self.obstacles.append(Obstacle())
         
     def process(self, events, screen):
@@ -191,10 +194,32 @@ class Manager():
         targets_c = []
         for i, ball in enumerate(self.balls):
             for j, target in enumerate(self.targets):
+            
                 if target.check_ball(ball):
                     targets_c.append(j)
+                    
+            for obstacle in self.obstacles:
+                distance = ((obstacle.mid[0] - ball.coord[0])*np.sin(obstacle.angle) - (obstacle.mid[1] - ball.coord[1])*np.cos(obstacle.angle),
+                           -(obstacle.mid[1] - ball.coord[1])*np.sin(obstacle.angle) - (obstacle.mid[0] - ball.coord[0])*np.sin(obstacle.angle))
+
+                if  np.abs(distance[0]) < ball.rad and np.abs(distance[1]) < obstacle.rad/2: 
+                    self.obstacles.pop(0)
+                    if distance[0] > 0:
+                    
+                        ball.coord[0] = int((obstacle.mid[0] - (ball.rad)*np.sin(obstacle.angle) + distance[1]*np.cos(obstacle.angle)))
+                        ball.coord[1] = int(obstacle.mid[1] + (ball.rad)*np.cos(obstacle.angle) + distance[1]*np.sin(obstacle.angle))
+                       
+                        #ball.flip_vel([np.sin(obstacle.angle), -np.cos(obstacle.angle)])
+                        
+                    if distance[0] < 0:
+                    
+                        ball.coord[0] = int(obstacle.mid[0] + (ball.rad)*np.sin(obstacle.angle) + distance[1]*np.cos(obstacle.angle))
+                        ball.coord[1] = int(obstacle.mid[1] - (ball.rad)*np.cos(obstacle.angle) + distance[1]*np.sin(obstacle.angle))
+                       
+                        #ball.flip_vel([-np.sin(obstacle.angle), np.cos(obstacle.angle)])
+                            
         targets_c.sort()
-        for j in reversed(targets_c):
+        for j in reversed(targets_c):                                                                                                     
             self.table.t_destr += 1
             self.targets.pop(j)   
     
@@ -236,7 +261,7 @@ clock = pg.time.Clock()
 mgr = Manager()
 
 while not done:
-    clock.tick(60)
+    clock.tick(20)
 
     done = mgr.process(pg.event.get(), screen)
 
