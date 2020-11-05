@@ -23,6 +23,9 @@ class Gun():
         self.active = False
 
     def strike(self):
+        '''
+        Function that spawn ball from gun of Kolganov
+        '''
         vel = [int(self.power * np.cos(self.angle)), int(self.power * np.sin(self.angle))]
         self.active = False
         self.power = self.min_pow
@@ -33,6 +36,9 @@ class Gun():
             self.power += 1
 
     def draw(self, screen):
+        '''
+        Function that draws canon
+        '''
         gun_shape = []
         v1 = np.array([int(5*np.cos(self.angle - np.pi/2)), int(5*np.sin(self.angle - np.pi/2))])
         v2 = np.array([int(self.power*2*np.cos(self.angle)), int(self.power*2*np.sin(self.angle))])
@@ -62,6 +68,9 @@ class Ball():
         pg.draw.circle(screen, self.color, self.coord, self.rad)
     
     def move(self, t_step=1., a=1):
+        '''
+        Function that moves balls
+        '''
         self.vel[1] += a*t_step
         for i in range(2):
             self.coord[i] += int(self.vel[i] * t_step)
@@ -71,6 +80,9 @@ class Ball():
             self.delete = True
         
     def check_walls(self):
+        '''
+        Function that reflects balls from the walls
+        '''
         n = [[1, 0], [0, 1]]
         for i in range(2):
             if self.coord[i] < self.rad:
@@ -81,6 +93,9 @@ class Ball():
                 self.flip_vel(n[i])
                 
     def flip_vel(self, axis, coef_perp = 0.8, coef_par = .9):
+        '''
+        Function that reflects balls from specific surface
+        '''
         vel = np.array(self.vel)
         n = np.array(axis)
         n = n / np.linalg.norm(n)
@@ -97,16 +112,22 @@ class Target():
         self.color = color
         
     def check_ball(self,ball):
+        '''
+        Function that checks if ball destroy target
+        '''
         dist = sum([(self.coord[i] - ball.coord[i])**2 for i in range(2)])**0.5
         min_dist = self.rad + ball.rad
         return dist <= min_dist    
             
     def draw(self, screen):
+        '''
+        Function that draws target
+        '''
         pg.draw.circle(screen, self.color, self.coord, self.rad)
        
 class Obstacle():
-    def __init__(self, coord=None, color=RED, rad=90):
-        coord = [randint(90, SCREEN_SIZE[0] - 90), randint(90, SCREEN_SIZE[1] - 90)]
+    def __init__(self, target, coord=None, color=RED, rad=90):
+        coord = [target.coord[0] - randint(50, 95),10 + target.coord[1]]
         angle = [randint(0,360)]
         self.coord = coord
         self.rad = rad
@@ -117,6 +138,9 @@ class Obstacle():
         self.coord2 = (self.rad*np.cos(self.angle) + self.coord[0] ,self.rad*np.sin(self.angle) + self.coord[1])
             
     def draw(self, screen):
+        '''
+        Function that draws obstacle
+        '''
         pg.draw.line(screen, self.color, self.coord, self.coord2, 1)
 
     
@@ -127,9 +151,15 @@ class Table():
         self.font = pg.font.SysFont("Ariel", 50)
 
     def score(self):
+        '''
+        Function that count score
+        '''
         return self.t_destr - self.b_used
     
     def draw(self,screen):
+        '''
+        Function that draws score table
+        '''
         surf = []
         surf.append(self.font.render("Score: {}".format(self.score()), True, BLUE))
         screen.blit(surf[0], [10, 10])
@@ -149,8 +179,9 @@ class Manager():
     def new_targets(self):
         self.targets.append(Target())
         if len(self.obstacles) > 0: 
-            self.obstacles.pop(0)        
-        self.obstacles.append(Obstacle())
+            self.obstacles.pop(0)
+        for target in self.targets:        
+            self.obstacles.append(Obstacle(target))
         
     def process(self, events, screen):
         done = self.handle_events(events)
